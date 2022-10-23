@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.udacity.project4.base.BaseViewModel
@@ -42,8 +43,11 @@ class RemindersListViewModel(
                     })
                     remindersList.value = dataList
                 }
-                is Result.Error ->
+                is Result.Error ->{
+                    Log.e("TAG", "error: ${result.message}" )
                     showSnackBar.value = result.message
+                }
+
             }
 
             //check if no data has to be shown

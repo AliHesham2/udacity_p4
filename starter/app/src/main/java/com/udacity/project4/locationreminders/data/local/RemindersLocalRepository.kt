@@ -1,5 +1,6 @@
 package com.udacity.project4.locationreminders.data.local
 
+import android.util.Log
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
@@ -24,7 +25,7 @@ class RemindersLocalRepository(
      */
     override suspend fun getReminders(): Result<List<ReminderDTO>> = withContext(ioDispatcher) {
         return@withContext try {
-            Result.Success(remindersDao.getReminders())
+            Result.Success(remindersDao.getReminders()?: emptyList())
         } catch (ex: Exception) {
             Result.Error(ex.localizedMessage)
         }
