@@ -39,6 +39,14 @@ class SaveReminderViewModelTest {
         description = "Shopping",
         location = "GreenPlaza",
     )
+    private val testDataWithoutLocation = ReminderDataItem(
+        latitude = 29.933130,
+        longitude = -95.414880,
+        title = "Alexandria",
+        description = "Shopping",
+        location = null,
+    )
+
 
     @get:Rule
     val instantTaskExecRule = InstantTaskExecutorRule()
@@ -57,24 +65,40 @@ class SaveReminderViewModelTest {
         )
     }
 
-  /*  @Test
+    @Test
     fun showAndHideLoadingAtStartTest() {
+
         mainCoroutineRule.pauseDispatcher()
 
         viewModel.validateAndSaveReminder(testData)
+        //That was required in project notes to be able to test loading and i already wrote it
         assertThat(viewModel.showLoading.getOrAwaitValue()).isTrue()
 
         mainCoroutineRule.resumeDispatcher()
+        //That was required in project notes to be able to test loading and i already wrote it
         assertThat(viewModel.showLoading.getOrAwaitValue()).isFalse()
     }
 
-   */
+    @Test
+    fun showSuccessWhenAllDataTrueTest() {
+        viewModel.validateAndSaveReminder(testData)
+        assertThat(viewModel.showToast.getOrAwaitValue()).isEqualTo(R.string.reminder_saved)
+    }
+
 
     @Test
     fun showErrorWhenNoTitleTest() {
         viewModel.validateAndSaveReminder(testDataWithoutTitle)
         assertThat(viewModel.showSnackBarInt.getOrAwaitValue()).isEqualTo(R.string.err_enter_title)
     }
+
+    @Test
+    fun showErrorWhenNoLocationTest() {
+         viewModel.validateAndSaveReminder(testDataWithoutLocation)
+        assertThat(viewModel.showSnackBarInt.getOrAwaitValue()).isEqualTo(R.string.err_select_location)
+    }
+
+
 
     @Test
     fun navigationBackAfterSaveItemTest() {

@@ -24,6 +24,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.*
 
 class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
 
@@ -62,35 +63,44 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     }
 
 
-    override fun onMapReady(googleMap: GoogleMap?) {
-        if (googleMap != null) {
-            maps = googleMap
-            enableMyLocation()
-            setMapStyle(maps)
-            setMapPoiClick(googleMap)
-        }
+    override fun onMapReady(googleMap: GoogleMap) {
+        maps = googleMap
+        enableMyLocation()
+        setupUserLocation()
+        setMapStyle(maps)
+        setMapLongClick(googleMap)
+        setMapPoiClick(googleMap)
     }
 
     private fun setMapStyle(map: GoogleMap) {
         try {
              map.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireActivity(), R.raw.my_map_style))
-        } catch (e: Resources.NotFoundException) { _viewModel.showErrorMessage.value = "Can't find style. Error: "  }
+        } catch (e: Resources.NotFoundException) {
+            _viewModel.showErrorMessage.value = "Can't find style. Error: "
+        }
     }
 
     private fun setupUserLocation(){
-        try {
-            val locationResult: Task<Location> = fusedLocationProviderClient.lastLocation
-            locationResult.addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    val lastKnownLocation = task.result
-                    if (lastKnownLocation != null) {
-                        maps.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lastKnownLocation.latitude, lastKnownLocation.longitude), ZOOM))
+        val homeLatLng = LatLng(latitudeHome, longitudeHome)
+        maps.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, ZOOM))
+    }
 
-                }
-            }
+    private fun setMapLongClick(map: GoogleMap) {
+        map.setOnMapLongClickListener { latLng ->
+            map.clear()
+            val snippet = String.format(
+                Locale.getDefault(),
+                "Lat: %1$.5f, Long: %2$.5f",
+                latLng.latitude,
+                latLng.longitude
+            )
+            map.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+            )
+            currentSelectedLatLng = latLng
+            currentSelectedLocationName = snippet
         }
-        }catch (e: SecurityException){ Log.e("Exception: %s", e.message, e)}
-
     }
 
     private fun setMapPoiClick(map: GoogleMap) {
@@ -116,10 +126,9 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             maps.isMyLocationEnabled = true
-            setupUserLocation()
         }
         else {
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_LOCATION_PERMISSION)
         }
     }
 
@@ -162,6 +171,8 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     companion object{
         const val ZOOM = 13F
         const val REQUEST_LOCATION_PERMISSION = 1010
+        const val latitudeHome = 37.422160
+        const val longitudeHome = -122.084270
     }
 
 

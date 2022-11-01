@@ -25,7 +25,7 @@ class RemindersLocalRepository(
      */
     override suspend fun getReminders(): Result<List<ReminderDTO>> = withContext(ioDispatcher) {
         return@withContext try {
-            Result.Success(remindersDao.getReminders()?: emptyList())
+            Result.Success(remindersDao.getReminders())
         } catch (ex: Exception) {
             Result.Error(ex.localizedMessage)
         }

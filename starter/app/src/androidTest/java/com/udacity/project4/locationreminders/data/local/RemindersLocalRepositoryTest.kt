@@ -81,4 +81,13 @@ class RemindersLocalRepositoryTest {
         assertThat(result.data).isEmpty()
     }
 
+    @Test
+    fun whenRemindersNotExistTest() = runBlocking {
+        val result = reminderRepository.getReminder(testData.id)
+        assertThat(result).isInstanceOf(Result.Error::class.java)
+        result as Result.Error
+        assertThat(result.message).isEqualTo("Reminder not found!")
+        assertThat(result.statusCode).isNull()
+    }
+
 }

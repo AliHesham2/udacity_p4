@@ -53,6 +53,14 @@ class RemindersListViewModelTest {
         assertThat(viewModel.showNoData.getOrAwaitValue()).isFalse()
     }
 
+
+    @Test
+    fun resultEmptyWhenNoDataTest() = runBlockingTest {
+        viewModel.loadReminders()
+        assertThat(viewModel.remindersList.getOrAwaitValue().isEmpty()).isTrue()
+        assertThat(viewModel.showNoData.getOrAwaitValue()).isTrue()
+    }
+
     @Test
     fun showLoadingTest() = runBlockingTest {
         mainCoroutineRule.pauseDispatcher()
@@ -60,10 +68,12 @@ class RemindersListViewModelTest {
         assertThat(viewModel.showLoading.getOrAwaitValue()).isTrue()
     }
 
+
     @Test
     fun showErrorTest() = runBlockingTest {
         fakeDataSource.setError(true)
         viewModel.loadReminders()
+        //here`s check if there is error msg executed
         assertThat(viewModel.showSnackBar.getOrAwaitValue()).isNotEmpty()
     }
 

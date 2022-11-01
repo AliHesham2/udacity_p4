@@ -6,7 +6,6 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import com.udacity.project4.R
-import com.udacity.project4.utils.PermissionChecking
 import kotlinx.android.synthetic.main.activity_reminders.*
 
 /**
@@ -16,7 +15,6 @@ class RemindersActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reminders)
-        PermissionChecking.checkPermissionsAndStartGeofencing(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

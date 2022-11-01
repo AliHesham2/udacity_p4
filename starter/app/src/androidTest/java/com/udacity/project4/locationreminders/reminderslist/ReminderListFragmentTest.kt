@@ -17,6 +17,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.util.DataBindingIdlingResource
@@ -45,6 +46,14 @@ import org.mockito.Mockito
 class ReminderListFragmentTest {
     private lateinit var reminderRepository: ReminderDataSource
     private val dataBinding = DataBindingIdlingResource()
+
+    private val testData = ReminderDTO(
+        latitude = 29.933130,
+        longitude = -95.414880,
+        title = "Alexandria",
+        description = "Shopping",
+        location = "GreenPlaza",
+    )
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -86,8 +95,7 @@ class ReminderListFragmentTest {
 
     @Test
     fun navigationTest() {
-        val scenario =
-            launchFragmentInContainer<ReminderListFragment>(Bundle.EMPTY, R.style.AppTheme)
+        val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle.EMPTY, R.style.AppTheme)
         val navController = Mockito.mock(NavController::class.java)
         dataBinding.monitorFragment(scenario)
         scenario.onFragment { Navigation.setViewNavController(it.view!!, navController) }
@@ -102,6 +110,26 @@ class ReminderListFragmentTest {
         dataBinding.monitorFragment(scenario)
         scenario.onFragment { Navigation.setViewNavController(it.view!!, navController) }
         Espresso.onView(withText("No Data")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+    }
+
+    @Test
+    fun showRemindersOnScreenTest() {
+
+        runBlocking {
+            reminderRepository.saveReminder(testData)
+        }
+
+        val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle.EMPTY, R.style.AppTheme)
+        val navController = Mockito.mock(NavController::class.java)
+        dataBinding.monitorFragment(scenario)
+
+        scenario.onFragment {
+            Navigation.setViewNavController(it.view!!, navController)
+        }
+
+        Espresso.onView(withText(testData.title)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        Espresso.onView(withText(testData.description)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        Espresso.onView(withText(testData.location)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
     }
 
 }

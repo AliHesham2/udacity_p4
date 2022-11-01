@@ -2,13 +2,20 @@ package com.udacity.project4
 
 import android.app.Application
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.google.android.material.internal.ContextUtils.getActivity
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
@@ -30,6 +37,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
+import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.not
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -103,7 +112,6 @@ class RemindersActivityTest :
         runBlocking {
             repository.saveReminder(testData)
         }
-
         dataBinding.monitorActivity( ActivityScenario.launch(RemindersActivity::class.java))
         Espresso.onView(ViewMatchers.withText(testData.location)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
         Espresso.onView(ViewMatchers.withText(testData.title)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
@@ -111,4 +119,27 @@ class RemindersActivityTest :
     }
 
 
+    @Test
+    fun noLocationAddErrorTest() {
+        val scenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBinding.monitorActivity(scenario)
+        Espresso.onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+        Espresso.onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+        Espresso.onView(withId(R.id.saveLocation)).perform(ViewActions.click())
+        onView(withText("Please select Point of interest")).inRoot(RootMatchers.withDecorView(not(`is`(getActivity(getApplicationContext())?.window?.decorView)))).check(matches(isDisplayed()))
+
+    }
+    @Test
+    fun noDetailsAddErrorTest() {
+        val scenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBinding.monitorActivity(scenario)
+        Espresso.onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+
+        Espresso.onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+        Espresso.onView(withId(R.id.map)).perform(ViewActions.longClick())
+        Espresso.onView(withId(R.id.saveLocation)).perform(ViewActions.click())
+        Espresso.closeSoftKeyboard()
+        Espresso.onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withText(R.string.err_enter_title)).inRoot(RootMatchers.withDecorView(not(`is`(getActivity(getApplicationContext())?.window?.decorView)))).check(matches(isDisplayed()))
+    }
 }
