@@ -71,10 +71,10 @@ class RemindersListViewModelTest {
 
     @Test
     fun showErrorTest() = runBlockingTest {
-        fakeDataSource.setError(true)
+        fakeDataSource.setShouldReturnError(true)
         viewModel.loadReminders()
         //here`s check if there is error msg executed
-        assertThat(viewModel.showSnackBar.getOrAwaitValue()).isNotEmpty()
+        assertThat(viewModel.showSnackBar.getOrAwaitValue()).isEqualTo("Error occurred")
     }
 
     @Test

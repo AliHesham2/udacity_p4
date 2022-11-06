@@ -68,9 +68,10 @@ class SaveReminderFragment : BaseFragment() {
 
         binding.saveReminder.setOnClickListener {
                  currentReminderData = ReminderDataItem(_viewModel.reminderTitle.value, _viewModel.reminderDescription.value, _viewModel.reminderSelectedLocationStr.value, _viewModel.latitude.value, _viewModel.longitude.value)
-                _viewModel.validateAndSaveReminder(currentReminderData!!)
-                if (currentReminderData?.title != null && currentReminderData?.description != null) {
+                if (currentReminderData?.title != null && currentReminderData?.description != null && currentReminderData?.latitude != null) {
                     checkPermissionsAndStartGeofencing()
+                }else{
+                    _viewModel.validateAndSaveReminder(ReminderDataItem(currentReminderData?.title,currentReminderData?.description,null,null,null,""))
                 }
         }
     }
@@ -184,13 +185,16 @@ class SaveReminderFragment : BaseFragment() {
 
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
                 addOnSuccessListener {
-                    _viewModel.showToast.value = "Geo added successfully"
+                    _viewModel.showSnackBar.value = "Geo added successfully"
+                    //Save data to DB when Geo added Done
+                    _viewModel.validateAndSaveReminder(currentReminderData!!)
+                    currentReminderData = null
                 }
                 addOnFailureListener {
-                    _viewModel.showToast.value = "Some thing went wrong"
+                    _viewModel.showToast.value = "Failed to add location!!! Try again later"
+                    currentReminderData = null
                 }
             }
-            currentReminderData = null
         }
     }
 

@@ -18,12 +18,13 @@ object EspressoIdlingResource {
             countingIdlingResource.decrement()
         }
     }
-    inline fun <T> wrapEspressoIdlingResource(function: () -> T): T {
-        EspressoIdlingResource.increment()
-        return try {
-            function()
-        } finally {
-            EspressoIdlingResource.decrement()
-        }
+}
+
+inline fun <T> wrapEspressoIdlingResource(function: () -> T): T {
+    EspressoIdlingResource.increment()
+    return try {
+        function()
+    } finally {
+        EspressoIdlingResource.decrement()
     }
 }
